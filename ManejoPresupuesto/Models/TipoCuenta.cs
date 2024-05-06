@@ -1,4 +1,5 @@
 ﻿using ManejoPresupuesto.Validations;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace ManejoPresupuesto.Models
@@ -11,6 +12,7 @@ namespace ManejoPresupuesto.Models
         [FirstLetterCapitalized]
         //[StringLength(maximumLength: 50, MinimumLength = 3, ErrorMessage = "La longitud del campo {0} debe estar entre {2} y {1}")]
         //[Display(Name = "Nombre del tipo de cuenta")]
+        [Remote(action: "VerificarExisteTipoCuenta", controller: "TiposCuentas")]
         public string Nombre { get; set; }
         
         public int UsuarioId { get; set; }
