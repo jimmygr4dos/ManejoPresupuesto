@@ -10,6 +10,7 @@ namespace ManejoPresupuesto.Repositories
         Task Crear(Cuenta cuenta);
         Task<Cuenta> ObtenerPorId(int cuentaId, int usuarioId);
         Task Actualizar(CuentaCreacionViewModel cuenta);
+        Task Borrar(int cuentaId);
     }
     public class CuentasRepository : ICuentasRepository
     {
@@ -53,6 +54,12 @@ namespace ManejoPresupuesto.Repositories
                                         WHERE b.UsuarioId = @UsuarioId
                                         AND a.Id = @Id", 
                                         new { id = cuentaId, usuarioId });
+        }
+
+        public async Task Borrar (int cuentaId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync("DELETE Cuentas WHERE Id = @Id", new { id = cuentaId });
         }
 
         public async Task Actualizar (CuentaCreacionViewModel cuenta)

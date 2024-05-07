@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<ITiposCuentasRepository, TiposCuentasRepository>();
 builder.Services.AddTransient<ICuentasRepository, CuentasRepository>();
+builder.Services.AddTransient<ICategoriasRepository, CategoriasRepository>();
 builder.Services.AddTransient<IUsersService, UsersService>();
 
 builder.Services.AddAutoMapper(typeof(Program));
