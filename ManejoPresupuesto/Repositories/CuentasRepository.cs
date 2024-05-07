@@ -2,14 +2,16 @@
 using ManejoPresupuesto.Models;
 using Microsoft.Data.SqlClient;
 
-namespace ManejoPresupuesto.Services
+namespace ManejoPresupuesto.Repositories
 {
     public interface ICuentasRepository
     {
         Task<IEnumerable<Cuenta>> Obtener(int usuarioId);
         Task Crear(Cuenta cuenta);
+        Task<Cuenta> ObtenerPorId(int cuentaId, int usuarioId);
+        Task Actualizar(CuentaCreacionViewModel cuenta);
     }
-    public class CuentasRepository: ICuentasRepository
+    public class CuentasRepository : ICuentasRepository
     {
         private readonly string connectionString;
 
@@ -38,6 +40,29 @@ namespace ManejoPresupuesto.Services
                                         ON a.TipoCuentaId = b.Id
                                         WHERE b.UsuarioId = @UsuarioId
                                         ORDER BY b.Orden", new { usuarioId });
+        }
+
+        public async Task<Cuenta> ObtenerPorId (int cuentaId, int usuarioId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryFirstOrDefaultAsync<Cuenta>
+                                    (@"SELECT a.Id, a.Nombre, a.Balance, a.Descripcion, b.Id AS TipoCuentaId
+                                        FROM Cuentas AS a
+                                        INNER JOIN TiposCuentas AS b
+                                        ON a.TipoCuentaId = b.Id
+                                        WHERE b.UsuarioId = @UsuarioId
+                                        AND a.Id = @Id", 
+                                        new { id = cuentaId, usuarioId });
+        }
+
+        public async Task Actualizar (CuentaCreacionViewModel cuenta)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync
+                                     (@"UPDATE Cuentas 
+                                        Set Nombre = @Nombre, Balance = @Balance, 
+                                        Descripcion = @Descripcion, TipoCuentaId = @TipoCuentaId
+                                        WHERE Id = @Id", cuenta);
         }
     }
 }
