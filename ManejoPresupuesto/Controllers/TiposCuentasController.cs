@@ -7,10 +7,19 @@ namespace ManejoPresupuesto.Controllers
     public class TiposCuentasController: Controller
     {
         private readonly ITiposCuentasRepository _tiposCuentasRepository;
+        private readonly IUsersService _usersService;
 
-        public TiposCuentasController(ITiposCuentasRepository tiposCuentasRepository)
+        public TiposCuentasController(ITiposCuentasRepository tiposCuentasRepository, IUsersService usersService)
         {
             _tiposCuentasRepository = tiposCuentasRepository;
+            _usersService = usersService;
+        }
+
+        public async Task<IActionResult> Index ()
+        {
+            var usuarioId = _usersService.ObtenerUsuarioId();
+            var tiposCuentas = await _tiposCuentasRepository.Obtener(usuarioId);
+            return View(tiposCuentas);
         }
 
         public IActionResult Crear()
@@ -26,7 +35,7 @@ namespace ManejoPresupuesto.Controllers
                 return View(tipoCuenta);
             }
 
-            tipoCuenta.UsuarioId = 1;
+            tipoCuenta.UsuarioId = _usersService.ObtenerUsuarioId();
             var existe = await _tiposCuentasRepository.Existe(tipoCuenta.Nombre, tipoCuenta.UsuarioId);
 
             if(existe)
@@ -37,13 +46,71 @@ namespace ManejoPresupuesto.Controllers
 
             await _tiposCuentasRepository.Crear(tipoCuenta);
 
-            return View();
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Editar (int tipoCuentaId)
+        {
+            var usuarioId = _usersService.ObtenerUsuarioId();
+            var tipoCuenta = await _tiposCuentasRepository.ObtenerPorId(tipoCuentaId, usuarioId);
+
+            if (tipoCuenta is null)
+            {
+                return RedirectToAction("NoEncontrado", "Home");
+            }
+
+            return View(tipoCuenta);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Editar (TipoCuenta tipoCuenta)
+        {
+            var usuarioId = _usersService.ObtenerUsuarioId();
+            var existe = await _tiposCuentasRepository.ObtenerPorId(tipoCuenta.Id, usuarioId);
+
+            if (existe is null)
+            {
+                return RedirectToAction("NoEncontrado", "Home");
+            }
+
+            await _tiposCuentasRepository.Actualizar(tipoCuenta);
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Borrar (int tipoCuentaId)
+        {
+            var usuarioId = _usersService.ObtenerUsuarioId();
+            var tipoCuenta = await _tiposCuentasRepository.ObtenerPorId(tipoCuentaId, usuarioId);
+
+            if (tipoCuenta is null)
+            {
+                return RedirectToAction("NoEncontrado", "Home");
+            }
+
+            return View(tipoCuenta);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BorrarTipoCuenta(TipoCuenta tipoCuenta)
+        {
+            var usuarioId = _usersService.ObtenerUsuarioId();
+            var existe = await _tiposCuentasRepository.ObtenerPorId(tipoCuenta.Id, usuarioId);
+
+            if (existe is null)
+            {
+                return RedirectToAction("NoEncontrado", "Home");
+            }
+
+            await _tiposCuentasRepository.Borrar(tipoCuenta.Id);
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
         public async Task<IActionResult> VerificarExisteTipoCuenta(string nombre)
         {
-            var usuarioId = 1;
+            var usuarioId = _usersService.ObtenerUsuarioId();
             var existe = await _tiposCuentasRepository.Existe(nombre, usuarioId);
             
             if (existe)
@@ -53,5 +120,12 @@ namespace ManejoPresupuesto.Controllers
 
             return Json(true);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Ordenar([FromBody] int[] ids)
+        {
+            return Ok();
+        }
+
     }
 }
