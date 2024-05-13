@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using ManejoPresupuesto.Enums;
 using ManejoPresupuesto.Models;
 using Microsoft.Data.SqlClient;
 
@@ -10,6 +11,7 @@ namespace ManejoPresupuesto.Repositories
         Task Borrar(int categoriaId);
         Task Crear(Categoria categoria);
         Task<IEnumerable<Categoria>> Obtener(int usuarioId);
+        Task<IEnumerable<Categoria>> Obtener(int usuarioId, TipoOperacion tipoOperacionId);
         Task<Categoria> ObtenerPorId(int categoriaId, int usuarioId);
     }
     public class CategoriasRepository: ICategoriasRepository
@@ -39,6 +41,17 @@ namespace ManejoPresupuesto.Repositories
                                             FROM Categorias
                                             WHERE UsuarioId = @UsuarioId",
                                             new { usuarioId });
+        }
+
+        public async Task<IEnumerable<Categoria>> Obtener(int usuarioId, TipoOperacion tipoOperacionId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryAsync<Categoria>
+                                         (@"SELECT Id, Nombre, TipoOperacionId, UsuarioId
+                                            FROM Categorias
+                                            WHERE UsuarioId = @UsuarioId
+                                            AND TipoOperacionId = @TipoOperacionId",
+                                            new { usuarioId, tipoOperacionId });
         }
 
         public async Task<Categoria> ObtenerPorId (int categoriaId, int usuarioId)
