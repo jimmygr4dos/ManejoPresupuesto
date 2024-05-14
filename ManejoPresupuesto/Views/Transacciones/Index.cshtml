@@ -1,9 +1,10 @@
-﻿
+﻿@model ReporteTransaccionesDetalladas
+
 @{
-    ViewData["Title"] = "Transacciones";
+    ViewData["Title"] = "Reporte Diario de Transacciones";
 }
 
 <h1>Transacciones</h1>
 <h5>Una transacción te permite indicar tus ingresos y gastos</h5>
 
-
+<partial name="_ReporteTransaccionesDetalladas" model="Model" />
