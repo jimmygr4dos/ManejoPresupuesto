@@ -15,6 +15,7 @@ namespace ManejoPresupuesto.Controllers
         private readonly ICuentasRepository _cuentasRepository;
         private readonly ICategoriasRepository _categoriasRepository;
         private readonly ITransaccionesRepository _transaccionesRepository;
+        private readonly IReportService _reportService;
         private readonly IMapper _mapper;
 
         public TransaccionesController(
@@ -22,12 +23,14 @@ namespace ManejoPresupuesto.Controllers
             ICuentasRepository cuentasRepository,
             ICategoriasRepository categoriasRepository,
             ITransaccionesRepository transaccionesRepository,
+            IReportService reportService,
             IMapper mapper)
         {
             _userService = userService;
             _cuentasRepository = cuentasRepository;
             _categoriasRepository = categoriasRepository;
             _transaccionesRepository = transaccionesRepository;
+            _reportService = reportService;
             _mapper = mapper;
         }
 
@@ -35,50 +38,8 @@ namespace ManejoPresupuesto.Controllers
         {
             var usuarioId = _userService.ObtenerUsuarioId();
 
-            DateTime fechaInicio;
-            DateTime fechaFin;
-
-            if (mes <= 0 || mes > 12 || año <= 1900)
-            {
-                var hoy = DateTime.Today;
-                fechaInicio = new DateTime(hoy.Year, hoy.Month, 1);
-            }
-            else
-            {
-                fechaInicio = new DateTime(año, mes, 1);
-            }
-
-            fechaFin = fechaInicio.AddMonths(1).AddDays(-1);
-
-            var parametro = new ParametroObtenerTransaccionesPorUsuario()
-            {
-                UsuarioId = usuarioId,
-                FechaInicio = fechaInicio,
-                FechaFin = fechaFin
-            };
-
-            var transacciones = await _transaccionesRepository.ObtenerPorUsuarioId(parametro);
-
-            var modelo = new ReporteTransaccionesDetalladas();
-
-            var transaccionesPorFecha = transacciones
-                                        .OrderByDescending(x => x.FechaTransaccion)
-                                        .GroupBy(x => x.FechaTransaccion)
-                                        .Select(grupo => new ReporteTransaccionesDetalladas.TransaccionesPorFecha()
-                                        {
-                                            FechaTransaccion = grupo.Key,
-                                            Transacciones = grupo.AsEnumerable()
-                                        });
-
-            modelo.TransaccionesAgrupadas = transaccionesPorFecha;
-            modelo.FechaInicio = fechaInicio;
-            modelo.FechaFin = fechaFin;
-
-            ViewBag.mesAnterior = fechaInicio.AddMonths(-1).Month;
-            ViewBag.añoAnterior = fechaInicio.AddMonths(-1).Year;
-            ViewBag.mesPosterior = fechaInicio.AddMonths(1).Month;
-            ViewBag.añoPosterior = fechaInicio.AddMonths(1).Year;
-            ViewBag.urlRetorno = HttpContext.Request.Path + HttpContext.Request.QueryString;
+            var modelo = await _reportService.ObtenerReporteTransaccinesDetalladas
+                                                (usuarioId, mes, año, ViewBag);
 
             return View(modelo);
         }
