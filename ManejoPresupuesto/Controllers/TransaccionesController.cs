@@ -4,6 +4,7 @@ using ManejoPresupuesto.Enums;
 using ManejoPresupuesto.Models;
 using ManejoPresupuesto.Repositories;
 using ManejoPresupuesto.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Data;
@@ -11,6 +12,7 @@ using System.Reflection;
 
 namespace ManejoPresupuesto.Controllers
 {
+    //[Authorize]
     public class TransaccionesController : Controller
     {
         private readonly IUsersService _userService;
@@ -36,6 +38,7 @@ namespace ManejoPresupuesto.Controllers
             _mapper = mapper;
         }
 
+        //[Authorize]
         public async Task<IActionResult> Index(int mes, int año)
         {
             var usuarioId = _userService.ObtenerUsuarioId();
