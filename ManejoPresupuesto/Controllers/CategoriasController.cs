@@ -19,11 +19,24 @@ namespace ManejoPresupuesto.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(PaginacionViewModel paginacionViewModel)
         {
             var usuarioId = _userService.ObtenerUsuarioId();
-            var categorias = await _categoriasRepository.Obtener(usuarioId);
-            return View(categorias);
+            var categorias = await _categoriasRepository.Obtener(usuarioId, paginacionViewModel);
+            var totalCategorias = await _categoriasRepository.Contar(usuarioId);
+
+            var respuestaVM = new PaginacionRespuesta<Categoria>
+            {
+                Elementos = categorias,
+                Pagina = paginacionViewModel.Pagina,
+                RecordsPorPagina = paginacionViewModel.RecordsPorPagina,
+                CantidadTotalRecords = totalCategorias,
+                //BaseURL = "/categorias"
+                BaseURL = Url.Action()
+            };
+
+            return View(respuestaVM);
+            //return View(categorias);
         }
 
         [HttpGet]
