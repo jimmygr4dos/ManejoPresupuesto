@@ -79,5 +79,6 @@
     <Build Include="dbo\Stored Procedures\Transacciones_Insertar.sql" />
     <Build Include="dbo\Stored Procedures\Transacciones_Actualizar.sql" />
     <Build Include="dbo\Stored Procedures\Transacciones_Borrar.sql" />
+    <Build Include="dbo\Stored Procedures\SP_Prueba.sql" />
   </ItemGroup>
 </Project>
